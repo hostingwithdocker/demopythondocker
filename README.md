@@ -9,7 +9,7 @@ You need to install some tools to follow the instructions bellow:
 
 1. Docker Commnunity Edition (required): you should follow [this link](https://docs.docker.com/install/linux/docker-ce/ubuntu/) to install.
 2. Python 3.6.8 (optional for coding): I coded this demo on this version of python. Although the demo is just a another helloworld app. But i'm not sure it will run correctly on your machine. Consider to install Python 3.6.8 or use `pyenv` to switch the python bin.  
-3. Pipenv (optional for coding): Instead of pip, I use Pipenv. So please use it to manage the dependencies. Follow this link to install or simply try `pip install pipenv`
+3. Pipenv (optional for coding): Instead of pip, I use Pipenv. So please use it to manage the dependencies. Follow [this link](https://github.com/pyenv/pyenv#installation) to install or simply try `pip install pipenv`
 > I'm using Ubuntu to handle this demo. So may there are differences from your system. 
 
 ## What is docker? Image? Container?
