@@ -50,3 +50,124 @@ docker build -t demopythondocker .
 docker run -d --rm -e "APP_NAME=app01" -e "APP_BIND=0.0.0.0" -p "8080:8080" 
 ```
 Then access this link on your browser. You should see: "Hello World from app01"
+
+## How do I make this app more docker?
+I'm going explaining my process in the first way above, make the app fit the container.
+
+### First step, check the configable lines:
+
+Let take a look at the line [app.py:9](https://github.com/hostingwithdocker/demopythondocker/blob/readme/app.py#L9)
+```python
+resp.body = ('Hello World from %s' % cfg('app', 'name'))
+```
+It gets app's name via the function `cfg()` in [config.py](https://github.com/hostingwithdocker/demopythondocker/blob/readme/config.py#L9)
+
+I decided to make this function more docker, by changing from:
+```python
+def cfg(section, key, casting=str):
+    #configParser read the config from "config.ini"
+    return casting(configParser.get(section, key))
+```
+to this:
+```python
+def cfg(section, key, casting=str):
+    var_env = str(section+"_"+key).upper()
+    # Give the environment variable a shot before using the config file
+    if var_env in os.environ:
+        return os.environ[var_env]
+        
+    return casting(configParser.get(section, key))
+```
+
+As you see, I check the env var first then only take config file if env empty.
+
+Now, this app accepts config value from env and also the `config.ini` on my local code base.
+
+### Second step, write Dockerfile to build image
+You need a file which is called Dockerfile. In this file, you write down all the step that docker needs to follow to build an images.
+You can find more about Dockerfile [format here](https://docs.docker.com/engine/reference/builder/).
+
+The purpose of building image is packaging all required things to run the app. Include the source codes, OS dependencies, etc.
+
+
+```Dockerfile
+# To start the build process, 
+# insert the image of a Linux machine (Alpine OS) which preinstalled python 3.6.8
+# You can find all image you need at hub.docker.com  
+FROM python:3.6.8-alpine3.9
+
+# Set this ENV var for pipenv. It helps Pipenv know it must create the virtualenv inside the project directory 
+ENV PIPENV_VENV_IN_PROJECT=1
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the source code from the project dir into the directory app/ inside the container.
+COPY ./ /app
+
+# Run some initial command to make the container environmment best for the app
+RUN apk update && apk add bash tzdata &&\
+    cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime &&\
+    pip install --upgrade setuptools pip wheel pipenv &&\
+    pipenv install
+
+# Tell Docker expose the the port of the application. 
+# This is the internal port of the container
+# Don't confuse with the port of the host (the physical machine)
+EXPOSE 8080
+
+# CMD tell docker run this command everytime it starts the container.
+CMD ["/bin/bash","/app/run-container.sh"]
+```
+
+You also need add a `.dockerignore` file. This one will help docker know what files should be ignore when copy source code to the container.
+```
+.git/
+.idea
+.venv/
+__pycache__/
+*.pyc
+*.swp
+config.ini
+```
+
+### Build your image
+When you have `Dockerfile` and `.dockerignore`, let's build the image:
+```bash
+docker built -t demopythondocker:1.0.0 .
+```
+This command will make the image with name "demopythondocker:1.0.0", or if you don't specify the version, Docker will auto names it "demopythondocker:latest".
+The image name also known as `tag`, the number after `:` known as the version of the image.   
+Notice the dot "." at the end of the above command, it's a path to the directory for Dockerfile.
+
+### Run the app on Docker
+```bash
+docker run -d \
+    -e "APP_NAME=app01" \
+    -e "APP_BIND=0.0.0.0" \
+    -p 8080:8080 \
+    --name mydemo \
+    demopythondocker:latest
+```
+
+The command above run the image `demopythondocker:latest` under the name `mydemo`.
+It also gives the configurations via the env by place `-e`.
+Finally, It publish the container port to the physical machine's port via `-p`.
+
+Once the container run up, you can control it by some commands:
+```bash
+# List the running container on the system
+docker ps 
+
+# List all container, include the stop containers
+docker ps -a
+
+# Stop the container by its name, also give the container's id here
+docker stop mydemo
+
+# Start the container
+docker start mydemo
+
+# Or restart the container
+docker restart mydemo
+```
