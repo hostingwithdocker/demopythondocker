@@ -54,7 +54,7 @@ Then access this link on your browser. You should see: "Hello World from app01"
 ## How do I make this app more docker?
 I'm going explaining my process in the first way above, make the app fit the container.
 
-### First step, check the configable lines:
+### The first step, check the configable lines:
 
 Let take a look at the line [app.py:9](https://github.com/hostingwithdocker/demopythondocker/blob/readme/app.py#L9)
 ```python
@@ -83,8 +83,8 @@ As you see, I check the env var first then only take config file if env empty.
 
 Now, this app accepts config value from env and also the `config.ini` on my local code base.
 
-### Second step, write Dockerfile to build image
-You need a file which is called Dockerfile. In this file, you write down all the step that docker needs to follow to build an images.
+### The second step, write Dockerfile to build image
+You need a file which is called Dockerfile. In this file, you write down all the step that docker needs to follow to build an image.
 You can find more about Dockerfile [format here](https://docs.docker.com/engine/reference/builder/).
 
 The purpose of building image is packaging all required things to run the app. Include the source codes, OS dependencies, etc.
@@ -105,7 +105,7 @@ WORKDIR /app
 # Copy the source code from the project dir into the directory app/ inside the container.
 COPY ./ /app
 
-# Run some initial command to make the container environmment best for the app
+# Run some initial command to make the container environmment best fit for the app
 RUN apk update && apk add bash tzdata &&\
     cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime &&\
     pip install --upgrade setuptools pip wheel pipenv &&\
@@ -152,7 +152,7 @@ docker run -d \
 
 The command above run the image `demopythondocker:latest` under the name `mydemo`.
 It also gives the configurations via the env by place `-e`.
-Finally, It publish the container port to the physical machine's port via `-p`.
+Finally, It publishes the container port to the physical machine's port via `-p`.
 
 Once the container run up, you can control it by some commands:
 ```bash
