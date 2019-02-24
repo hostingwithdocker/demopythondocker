@@ -51,7 +51,7 @@ docker run -d --rm -e "APP_NAME=app01" -e "APP_BIND=0.0.0.0" -p "8080:8080"
 ```
 Then access this link on your browser. You should see: "Hello World from app01"
 
-## How do I make this app more docker?
+## How do I make this app more dockernized?
 I'm going explaining my process in the first way above, make the app fit the container.
 
 ### The first step, check the configable lines:
